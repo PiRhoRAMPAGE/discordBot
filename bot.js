@@ -50,6 +50,20 @@ function discordBot(token) {
         delete: (channelID) => apiCall("DELETE", "/channels/" + channelID, null, this.token),
         get: (channelID, optionalParam) => (optionalParam) ? JSON.parse(apiCall("GET", "/channels/" + channelID, null, this.token))[optionalParam] : JSON.parse(apiCall("GET", "/channels/" + channelID, null, this.token)),
         set: (channelID, paramsArray) => apiCall("PATCH", "/channels/" + channelID, paramsArray, this.token),
+        thread: {
+            startWithoutMessage: (channelID, name) => apiCall("POST", "/channels/" + channelID + "/threads", {name}, this.token),
+            startWithMessage: (channelID, messageID, name) => apiCall("POST", "/channels/" + channelID + "/messages/" + messageID + "/threads", {name}, this.token),
+            join: (channelID) => apiCall("PUT", "/channels/" + channelID + "/thread-members/@me", null, this.token),
+            leave: (channelID) => apiCall("DELETE", "/channels/" + channelID + "/thread-members/@me", null, this.token),
+            addMember: (channelID, userID) => apiCall("PUT", "/channels/" + channelID + "/thread-members/" + userID, null, this.token),
+            removeMember: (channelID, userID) => apiCall("DELETE", "/channels/" + channelID + "/thread-members/" + userID, null, this.token),
+            getMember: (channelID, userID) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/thread-members/" + userID, null, this.token)),
+            listMembers: (channelID) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/thread-members", null, this.token)),
+            listActiveThreads: (channelID) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/threads/active", null, this.token)),
+            listPublicArchivedThreads: (channelID, before, limit) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/threads/archived/public", {before, limit}, this.token)),
+            listPrivateArchivedThreads: (channelID, before, limit) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/threads/archived/private", {before, limit}, this.token)),
+            listJoinedPrivateArchivedThreads: (channelID, before, limit) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/users/@me/threads/archived/private", {before, limit}, this.token)),
+        }
     }
 
     this.role={
@@ -76,20 +90,6 @@ function discordBot(token) {
         set: (guildID, stickerID, paramsArray) => apiCall("PATCH", "/guilds/" + guildID + "/stickers/" + stickerID, paramsArray, this.token),
     }
     
-    this.thread={
-        startWithoutMessage: (channelID, name) => apiCall("POST", "/channels/" + channelID + "/threads", {name}, this.token),
-        startWithMessage: (channelID, messageID, name) => apiCall("POST", "/channels/" + channelID + "/messages/" + messageID + "/threads", {name}, this.token),
-        join: (channelID) => apiCall("PUT", "/channels/" + channelID + "/thread-members/@me", null, this.token),
-        leave: (channelID) => apiCall("DELETE", "/channels/" + channelID + "/thread-members/@me", null, this.token),
-        addMember: (channelID, userID) => apiCall("PUT", "/channels/" + channelID + "/thread-members/" + userID, null, this.token),
-        removeMember: (channelID, userID) => apiCall("DELETE", "/channels/" + channelID + "/thread-members/" + userID, null, this.token),
-        getMember: (channelID, userID) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/thread-members/" + userID, null, this.token)),
-        listMembers: (channelID) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/thread-members", null, this.token)),
-        listActiveThreads: (channelID) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/threads/active", null, this.token)),
-        listPublicArchivedThreads: (channelID, before, limit) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/threads/archived/public", {before, limit}, this.token)),
-        listPrivateArchivedThreads: (channelID, before, limit) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/threads/archived/private", {before, limit}, this.token)),
-        listJoinedPrivateArchivedThreads: (channelID, before, limit) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/users/@me/threads/archived/private", {before, limit}, this.token)),
-    }
 }
 
 function apiCall(method, endpoint, data, token) {
