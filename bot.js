@@ -31,7 +31,6 @@ function discordBot(token) {
         unban: (guildID, userID) => apiCall("DELETE", "/guilds/" + guildID + "/bans/" + userID, null, this.token),
         addRole: (guildID, userID, roleID) => apiCall("PUT","/guilds/" + guildID + "/members/" + userID + "/roles/" + roleID, this.token),
         removeRole: (guildID, userID, roleID) => apiCall("DELETE", "/guilds/" + guildID + "/members/" + userID + "/roles/" + roleID, this.token),
-        listBans: (guildID) => JSON.parse(apiCall("GET", "/guilds/" + guildID + "/bans", null, this.token)),
         nickname: (guildID, nick) => apiCall("PATCH", "/guilds/" + guildID + "/members/@me/nick", {nick}, this.token),
     }
 
@@ -40,6 +39,7 @@ function discordBot(token) {
         list: () => JSON.parse(apiCall("GET", "/users/@me/guilds", null, this.token)),
         join: (invite) => apiCall("POST", "/invites/" + inviteCode, {}, this.token),
         leave: (guildID) => apiCall("DELETE", "/users/@me/guilds/" + guildID, null, this.token),
+        listBans: (guildID) => JSON.parse(apiCall("GET", "/guilds/" + guildID + "/bans", null, this.token)),
         get: (guildID, optionalParam) => (optionalParam) ? JSON.parse(apiCall("DELETE", "/guilds/" + guildID, null))[optionalParam] : JSON.parse(apiCall("DELETE", "/guilds/" + guildID, null, this.token)),
         set: (guildID, paramsArray) => apiCall("PATCH", "/guilds/" + guildID, paramsArray, this.token),
     }
@@ -63,7 +63,7 @@ function discordBot(token) {
             listPublicArchivedThreads: (channelID, before, limit) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/threads/archived/public", {before, limit}, this.token)),
             listPrivateArchivedThreads: (channelID, before, limit) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/threads/archived/private", {before, limit}, this.token)),
             listJoinedPrivateArchivedThreads: (channelID, before, limit) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/users/@me/threads/archived/private", {before, limit}, this.token)),
-        },
+        }
     }
 
     this.role={
