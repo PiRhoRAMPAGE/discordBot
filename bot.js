@@ -42,7 +42,7 @@ function discordBot(token) {
         join: (invite) => apiCall("POST", "/invites/" + inviteCode, {}, this.token),
         leave: (guildID) => apiCall("DELETE", "/users/@me/guilds/" + guildID, null, this.token),
         listBans: (guildID) => JSON.parse(apiCall("GET", "/guilds/" + guildID + "/bans", null, this.token)),
-        get: (guildID, optionalParam) => (optionalParam) ? JSON.parse(apiCall("GET", "/guilds/" + guildID, null))[optionalParam] : JSON.parse(apiCall("DELETE", "/guilds/" + guildID, null, this.token)),
+        get: (guildID, optionalParam) => (optionalParam) ? JSON.parse(apiCall("GET", "/guilds/" + guildID, null))[optionalParam] : JSON.parse(apiCall("GET", "/guilds/" + guildID, null, this.token)),
         set: (guildID, paramsArray) => apiCall("PATCH", "/guilds/" + guildID, paramsArray, this.token),
     }
 
