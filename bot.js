@@ -1,68 +1,76 @@
+// https://pirho.tech/discord
+
 function discordBot(token) {
 
     this.token=token;
+    this.guildID=0;
+    this.channelID=0;
+    this.status=0;
+    this.response=null;
+    this.responseHeaders=null;
+
     this.wait=(ms) => new Promise((res) => setTimeout(res, ms));
-    this.online=() => {try{return this.self.get("discriminator") <= 9999} catch(e) {return false}},
+    this.online=() => {try{return this.self.get("discriminator") <= 9999} catch(e) {return false}};
 
     this.self={
-        get: (optionalParam) => (optionalParam) ? JSON.parse(apiCall("GET", "/users/@me", null, this.token))[optionalParam] : JSON.parse(apiCall("GET", "/users/@me", null, this.token)),
-        set: (paramsArray) => apiCall("PATCH", "/users/@me", paramsArray, this.token),
+        get: (optionalParam=null) => (optionalParam) ? JSON.parse(apiCall("GET", "/users/@me", null, this.token))[optionalParam] : JSON.parse(apiCall("GET", "/users/@me", null, this.token)),
+        set: (paramsArray) => apiCall("PATCH", "/users/@me", paramsArray, this),
     }
 
     this.message={
-        list: (channelID, limit=50) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/messages?limit=" + limit, null, this.token)),
-        send: (channelID, message) => apiCall("POST", "/channels/" + channelID + "/messages", {content: message}, this.token),
-        delete: (channelID, messageID) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID, null, this.token),
-        edit: (channelID, messageID, message) => apiCall("PATCH", "/channels/" + channelID + "/messages/" + messageID, {content: message}, this.token),
-        sendSticker: (channelID, stickerID) => apiCall("POST", "/channels/" + channelID + "/messages", {sticker_ids: [stickerID]}, this.token),
-        reply: (guildID, channelID, messageID, message) => apiCall("POST", "/channels/" + channelID + "/messages", {content: message, message_reference: {guild_id: guildID, channel_id: channelID, message_id: messageID}}, this.token),
+        list: (channelID, optionalLimit=50) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/messages?limit=" + optionalLimit, null, this.token)),
+        send: (channelID, message) => apiCall("POST", "/channels/" + channelID + "/messages", {content: message}, this),
+        delete: (channelID, messageID) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID, null, this),
+        edit: (channelID, messageID, message) => apiCall("PATCH", "/channels/" + channelID + "/messages/" + messageID, {content: message}, this),
+        sendSticker: (channelID, stickerID) => apiCall("POST", "/channels/" + channelID + "/messages", {sticker_ids: [stickerID]}, this),
+        reply: (guildID, channelID, messageID, message) => apiCall("POST", "/channels/" + channelID + "/messages", {content: message, message_reference: {guild_id: guildID, channel_id: channelID, message_id: messageID}}, this),
         reaction: {
-            add: (channelID, messageID, emoji) => apiCall("PUT", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji) + "/@me", null, this.token),
-            remove: (channelID, messageID, emoji) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji) + "/@me", null, this.token),
+            add: (channelID, messageID, emoji) => apiCall("PUT", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji) + "/@me", null, this),
+            remove: (channelID, messageID, emoji) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji) + "/@me", null, this),
             check: (channelID, messageID, emoji) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji), null, this.token)),
-            delete: (channelID, messageID, emoji) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji), null, this.token),
-            deleteAll: (channelID, messageID) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID + "/reactions/", null, this.token),
+            delete: (channelID, messageID, emoji) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji), null, this),
+            deleteAll: (channelID, messageID) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID + "/reactions", null, this),
         },
     }
 
     this.user={
-        get: (userID, optionalParam) => (optionalParam) ? JSON.parse(apiCall("GET", "/users/" + userID, null, this.token))[optionalParam] : JSON.parse(apiCall("GET", "/users/" + userID, null, this.token)),
-        kick: (guildID, userID) => apiCall("DELETE", "/guilds/" + guildID + "/members/" + userID, null, this.token),
-        ban: (guildID, userID, reason) => apiCall("PUT", "/guilds/" + guildID + "/bans/" + userID, {delete_message_days: "7", reason}, this.token),
-        unban: (guildID, userID) => apiCall("DELETE", "/guilds/" + guildID + "/bans/" + userID, null, this.token),
-        addRole: (guildID, userID, roleID) => apiCall("PUT","/guilds/" + guildID + "/members/" + userID + "/roles/" + roleID, this.token),
-        removeRole: (guildID, userID, roleID) => apiCall("DELETE", "/guilds/" + guildID + "/members/" + userID + "/roles/" + roleID, this.token),
-        nickname: (guildID, nick) => apiCall("PATCH", "/guilds/" + guildID + "/members/@me/nick", {nick}, this.token),
+        get: (userID, optionalParam=null) => (optionalParam) ? JSON.parse(apiCall("GET", "/users/" + userID, null, this.token))[optionalParam] : JSON.parse(apiCall("GET", "/users/" + userID, null, this.token)),
+        kick: (guildID, userID) => apiCall("DELETE", "/guilds/" + guildID + "/members/" + userID, null, this),
+        ban: (guildID, userID, optionalReason=null) => apiCall("PUT", "/guilds/" + guildID + "/bans/" + userID, {delete_message_days: "7", optionalReason}, this),
+        unban: (guildID, userID) => apiCall("DELETE", "/guilds/" + guildID + "/bans/" + userID, null, this),
+        addRole: (guildID, userID, roleID) => apiCall("PUT","/guilds/" + guildID + "/members/" + userID + "/roles/" + roleID, this),
+        removeRole: (guildID, userID, roleID) => apiCall("DELETE", "/guilds/" + guildID + "/members/" + userID + "/roles/" + roleID, this),
+        nickname: (guildID, nick) => apiCall("PATCH", "/guilds/" + guildID + "/members/@me/nick", {nick}, this),
     }
 
     this.guild={
         auditLog: (guildID) => JSON.parse(apiCall("GET", "/guilds/" + guildID + "/audit-logs", null, this.token)),
         list: () => JSON.parse(apiCall("GET", "/users/@me/guilds", null, this.token)),
-        join: (invite) => apiCall("POST", "/invites/" + inviteCode, {}, this.token),
-        leave: (guildID) => apiCall("DELETE", "/users/@me/guilds/" + guildID, null, this.token),
+        join: (inviteCode) => apiCall("POST", "/invites/" + inviteCode, {}, this),
+        leave: (guildID) => apiCall("DELETE", "/users/@me/guilds/" + guildID, null, this),
         listBans: (guildID) => JSON.parse(apiCall("GET", "/guilds/" + guildID + "/bans", null, this.token)),
-        get: (guildID, optionalParam) => (optionalParam) ? JSON.parse(apiCall("GET", "/guilds/" + guildID, null))[optionalParam] : JSON.parse(apiCall("GET", "/guilds/" + guildID, null, this.token)),
-        set: (guildID, paramsArray) => apiCall("PATCH", "/guilds/" + guildID, paramsArray, this.token),
+        get: (guildID, optionalParam=null) => (optionalParam) ? JSON.parse(apiCall("GET", "/guilds/" + guildID, null))[optionalParam] : JSON.parse(apiCall("GET", "/guilds/" + guildID, null, this.token)),
+        set: (guildID, paramsArray) => apiCall("PATCH", "/guilds/" + guildID, paramsArray, this),
     }
 
     this.channel={
         list: (guildID) => JSON.parse(apiCall("GET", "/guilds/" + guildID + "/channels", null, this.token)),
-        create: (guildID, name, type) => apiCall("POST", "/guilds/" + guildID + "/channels", {name, type}, this.token),
-        delete: (channelID) => apiCall("DELETE", "/channels/" + channelID, null, this.token),
-        get: (channelID, optionalParam) => (optionalParam) ? JSON.parse(apiCall("GET", "/channels/" + channelID, null, this.token))[optionalParam] : JSON.parse(apiCall("GET", "/channels/" + channelID, null, this.token)),
-        set: (channelID, paramsArray) => apiCall("PATCH", "/channels/" + channelID, paramsArray, this.token),
+        create: (guildID, name, type) => apiCall("POST", "/guilds/" + guildID + "/channels", {name, type}, this),
+        delete: (channelID) => apiCall("DELETE", "/channels/" + channelID, null, this),
+        get: (channelID, optionalParam=null) => (optionalParam) ? JSON.parse(apiCall("GET", "/channels/" + channelID, null, this.token))[optionalParam] : JSON.parse(apiCall("GET", "/channels/" + channelID, null, this.token)),
+        set: (channelID, paramsArray) => apiCall("PATCH", "/channels/" + channelID, paramsArray, this),
         pin: {
             list: (channelID) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/pins/", null, this.token)),
-            add: (channelID, messageID) => apiCall("PUT", "/channels/" + channelID + "/pins/" + messageID, null, this.token),
-            remove: (channelID, messageID) => apiCall("DELETE", "/channels/" + channelID + "/pins/" + messageID, null, this.token),
+            add: (channelID, messageID) => apiCall("PUT", "/channels/" + channelID + "/pins/" + messageID, null, this),
+            remove: (channelID, messageID) => apiCall("DELETE", "/channels/" + channelID + "/pins/" + messageID, null, this),
         },
         thread: {
-            startWithoutMessage: (channelID, name) => apiCall("POST", "/channels/" + channelID + "/threads", {name}, this.token),
-            startWithMessage: (channelID, messageID, name) => apiCall("POST", "/channels/" + channelID + "/messages/" + messageID + "/threads", {name}, this.token),
-            join: (channelID) => apiCall("PUT", "/channels/" + channelID + "/thread-members/@me", null, this.token),
-            leave: (channelID) => apiCall("DELETE", "/channels/" + channelID + "/thread-members/@me", null, this.token),
-            addMember: (channelID, userID) => apiCall("PUT", "/channels/" + channelID + "/thread-members/" + userID, null, this.token),
-            removeMember: (channelID, userID) => apiCall("DELETE", "/channels/" + channelID + "/thread-members/" + userID, null, this.token),
+            startWithoutMessage: (channelID, name) => apiCall("POST", "/channels/" + channelID + "/threads", {name}, this),
+            startWithMessage: (channelID, messageID, name) => apiCall("POST", "/channels/" + channelID + "/messages/" + messageID + "/threads", {name}, this),
+            join: (channelID) => apiCall("PUT", "/channels/" + channelID + "/thread-members/@me", null, this),
+            leave: (channelID) => apiCall("DELETE", "/channels/" + channelID + "/thread-members/@me", null, this),
+            addMember: (channelID, userID) => apiCall("PUT", "/channels/" + channelID + "/thread-members/" + userID, null, this),
+            removeMember: (channelID, userID) => apiCall("DELETE", "/channels/" + channelID + "/thread-members/" + userID, null, this),
             getMember: (channelID, userID) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/thread-members/" + userID, null, this.token)),
             listMembers: (channelID) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/thread-members", null, this.token)),
             listActiveThreads: (channelID) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/threads/active", null, this.token)),
@@ -74,37 +82,39 @@ function discordBot(token) {
 
     this.role={
         list: (guildID) => JSON.parse(apiCall("GET", "/guilds/" + guildID + "/roles", null, this.token)),
-        create: (guildID, name) => apiCall("POST", "/guilds/" + guildID + "/roles", {name}, this.token),
-        delete: (guildID, roleID) => apiCall("DELETE", "/guilds/" + guildID + "/roles/" + roleID, null, this.token),
-        get: (guildID, roleID, optionalParam) => (optionalParam) ? JSON.parse(apiCall("GET", "/guilds/" + guildID + "/roles/" + roleID, null))[optionalParam] : JSON.parse(apiCall("GET", "/guilds/" + guildID + "/roles/" + roleID, null, this.token)),
-        set: (guildID, roleID, paramsArray) => apiCall("PATCH", "/guilds/" + guildID + "/roles/" + roleID, paramsArray, this.token),
+        create: (guildID, name) => apiCall("POST", "/guilds/" + guildID + "/roles", {name}, this),
+        delete: (guildID, roleID) => apiCall("DELETE", "/guilds/" + guildID + "/roles/" + roleID, null, this),
+        get: (guildID, roleID, optionalParam=null) => (optionalParam) ? JSON.parse(apiCall("GET", "/guilds/" + guildID + "/roles/" + roleID, null))[optionalParam] : JSON.parse(apiCall("GET", "/guilds/" + guildID + "/roles/" + roleID, null, this.token)),
+        set: (guildID, roleID, paramsArray) => apiCall("PATCH", "/guilds/" + guildID + "/roles/" + roleID, paramsArray, this),
     }
 
     this.emoji={
         list: (guildID) => JSON.parse(apiCall("GET", "/guilds/" + guildID + "/emojis", null, this.token)),
-        create: (guildID, name, image, roles) => apiCall("POST", "/guilds/" + guildID + "/emojis", {name, image, roles}, this.token),
-        delete: (guildID, emojiID) => apiCall("DELETE", "/guilds/" + guildID + "/emojis/" + emojiID, null, this.token),
-        get: (guildID, emojiID, optionalParam) => (optionalParam) ? JSON.parse(apiCall("GET", "/guilds/" + guildID + "/emojis/" + emojiID, null, this.token))[optionalParam] : JSON.parse(apiCall("GET", "/guilds/" + guildID + "/emojis/" + emojiID, null, this.token)),
-        set: (guildID, emojiID, paramsArray) => apiCall("PATCH", "/guilds/" + guildID + "/emojis/" + emojiID, paramsArray, this.token),
+        create: (guildID, name, image, roles) => apiCall("POST", "/guilds/" + guildID + "/emojis", {name, image, roles}, this),
+        delete: (guildID, emojiID) => apiCall("DELETE", "/guilds/" + guildID + "/emojis/" + emojiID, null, this),
+        get: (guildID, emojiID, optionalParam=null) => (optionalParam) ? JSON.parse(apiCall("GET", "/guilds/" + guildID + "/emojis/" + emojiID, null, this.token))[optionalParam] : JSON.parse(apiCall("GET", "/guilds/" + guildID + "/emojis/" + emojiID, null, this.token)),
+        set: (guildID, emojiID, paramsArray) => apiCall("PATCH", "/guilds/" + guildID + "/emojis/" + emojiID, paramsArray, this),
     }
 
     this.sticker={
         list: (guildID) => JSON.parse(apiCall("GET", "/guilds/" + guildID + "/stickers", null, this.token)),
-        create: (guildID, name, description, tags, file) => apiCall("POST", "/guilds/" + guildID + "/stickers", {name, description, tags, file}, this.token),
-        delete: (guildID, stickerID) => apiCall("DELETE", "/guilds/" + guildID + "/stickers/" + stickerID, null, this.token),
-        get: (guildID, stickerID, optionalParam) => (optionalParam) ? JSON.parse(apiCall("GET", "/guilds/" + guildID + "/stickers/" + stickerID, null, this.token))[optionalParam] : JSON.parse(apiCall("GET", "/guilds/" + guildID + "/stickers/" + stickerID, null, this.token)),
-        set: (guildID, stickerID, paramsArray) => apiCall("PATCH", "/guilds/" + guildID + "/stickers/" + stickerID, paramsArray, this.token),
+        create: (guildID, name, description, tags, file) => apiCall("POST", "/guilds/" + guildID + "/stickers", {name, description, tags, file}, this),
+        delete: (guildID, stickerID) => apiCall("DELETE", "/guilds/" + guildID + "/stickers/" + stickerID, null, this),
+        get: (guildID, stickerID, optionalParam=null) => (optionalParam) ? JSON.parse(apiCall("GET", "/guilds/" + guildID + "/stickers/" + stickerID, null, this.token))[optionalParam] : JSON.parse(apiCall("GET", "/guilds/" + guildID + "/stickers/" + stickerID, null, this.token)),
+        set: (guildID, stickerID, paramsArray) => apiCall("PATCH", "/guilds/" + guildID + "/stickers/" + stickerID, paramsArray, this),
     }
     
 }
 
-function apiCall(method, endpoint, data, token) {
+function apiCall(method, endpoint, data, bot) {
     let http=new XMLHttpRequest();
     http.withCredentials=true;
     http.open(method, "https://discord.com/api/v9" + endpoint, 0);
-    http.setRequestHeader("authorization", token);
+    http.setRequestHeader("authorization", bot.token);
     http.setRequestHeader("content-type", "application/json");
     http.send(JSON.stringify(data))
-    return http.response;
+    bot.status=http.status;
+    bot.response=http.response;
+    bot.responseHeaders=http.getAllResponseHeaders();
+    return http.response;ewf
 }
-
