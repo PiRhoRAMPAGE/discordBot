@@ -1,9 +1,8 @@
-// https://pirho.tech/discord
-
 function discordBot(token) {
 
     this.token=token;
     this.wait=(ms) => new Promise((res) => setTimeout(res, ms));
+    this.online=() => {try{return this.self.get("discriminator") <= 9999} catch(e) {return false}},
 
     this.self={
         get: (optionalParam) => (optionalParam) ? JSON.parse(apiCall("GET", "/users/@me", null, this.token))[optionalParam] : JSON.parse(apiCall("GET", "/users/@me", null, this.token)),
@@ -11,23 +10,28 @@ function discordBot(token) {
     }
 
     this.message={
-        get: (channelID, limit=50) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/messages?limit=" + limit, null, this.token)),
+        list: (channelID, limit=50) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/messages?limit=" + limit, null, this.token)),
         send: (channelID, message) => apiCall("POST", "/channels/" + channelID + "/messages", {content: message}, this.token),
         delete: (channelID, messageID) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID, null, this.token),
         edit: (channelID, messageID, message) => apiCall("PATCH", "/channels/" + channelID + "/messages/" + messageID, {content: message}, this.token),
         sendSticker: (channelID, stickerID) => apiCall("POST", "/channels/" + channelID + "/messages", {sticker_ids: [stickerID]}, this.token),
         reply: (guildID, channelID, messageID, message) => apiCall("POST", "/channels/" + channelID + "/messages", {content: message, message_reference: {guild_id: guildID, channel_id: channelID, message_id: messageID}}, this.token),
-        reactions: {
+        reaction: {
             add: (channelID, messageID, emoji) => apiCall("PUT", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji) + "/@me", null, this.token),
             remove: (channelID, messageID, emoji) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji) + "/@me", null, this.token),
             check: (channelID, messageID, emoji) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji), null, this.token)),
             delete: (channelID, messageID, emoji) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji), null, this.token),
             deleteAll: (channelID, messageID) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID + "/reactions/", null, this.token),
         },
+        pin: {
+            list: (channelID) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/pins/", null, this.token)),
+            add: (channelID, messageID) => apiCall("PUT", "/channels/" + channelID + "/pins/" + messageID, null, this.token),
+            remove: (channelID, messageID) => apiCall("DELETE", "/channels/" + channelID + "/pins/" + messageID, null, this.token),
+        }
     }
 
     this.user={
-        get: (userID) => JSON.parse(apiCall("GET", "/users/" + userID, null, this.token)),
+        get: (userID, optionalParam) => (optionalParam) ? JSON.parse(apiCall("GET", "/users/" + userID, null, this.token))[optionalParam] : JSON.parse(apiCall("GET", "/users/" + userID, null, this.token)),
         kick: (guildID, userID) => apiCall("DELETE", "/guilds/" + guildID + "/members/" + userID, null, this.token),
         ban: (guildID, userID, reason) => apiCall("PUT", "/guilds/" + guildID + "/bans/" + userID, {delete_message_days: "7", reason}, this.token),
         unban: (guildID, userID) => apiCall("DELETE", "/guilds/" + guildID + "/bans/" + userID, null, this.token),
@@ -65,7 +69,7 @@ function discordBot(token) {
             listPublicArchivedThreads: (channelID, before, limit) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/threads/archived/public", {before, limit}, this.token)),
             listPrivateArchivedThreads: (channelID, before, limit) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/threads/archived/private", {before, limit}, this.token)),
             listJoinedPrivateArchivedThreads: (channelID, before, limit) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/users/@me/threads/archived/private", {before, limit}, this.token)),
-        }
+        } 
     }
 
     this.role={
