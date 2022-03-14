@@ -23,11 +23,6 @@ function discordBot(token) {
             delete: (channelID, messageID, emoji) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji), null, this.token),
             deleteAll: (channelID, messageID) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID + "/reactions/", null, this.token),
         },
-        pin: {
-            list: (channelID) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/pins/", null, this.token)),
-            add: (channelID, messageID) => apiCall("PUT", "/channels/" + channelID + "/pins/" + messageID, null, this.token),
-            remove: (channelID, messageID) => apiCall("DELETE", "/channels/" + channelID + "/pins/" + messageID, null, this.token),
-        }
     }
 
     this.user={
@@ -56,6 +51,11 @@ function discordBot(token) {
         delete: (channelID) => apiCall("DELETE", "/channels/" + channelID, null, this.token),
         get: (channelID, optionalParam) => (optionalParam) ? JSON.parse(apiCall("GET", "/channels/" + channelID, null, this.token))[optionalParam] : JSON.parse(apiCall("GET", "/channels/" + channelID, null, this.token)),
         set: (channelID, paramsArray) => apiCall("PATCH", "/channels/" + channelID, paramsArray, this.token),
+        pin: {
+            list: (channelID) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/pins/", null, this.token)),
+            add: (channelID, messageID) => apiCall("PUT", "/channels/" + channelID + "/pins/" + messageID, null, this.token),
+            remove: (channelID, messageID) => apiCall("DELETE", "/channels/" + channelID + "/pins/" + messageID, null, this.token),
+        },
         thread: {
             startWithoutMessage: (channelID, name) => apiCall("POST", "/channels/" + channelID + "/threads", {name}, this.token),
             startWithMessage: (channelID, messageID, name) => apiCall("POST", "/channels/" + channelID + "/messages/" + messageID + "/threads", {name}, this.token),
