@@ -2,14 +2,13 @@
 
 function discordBot(token) {
 
-    this.wait=(ms) => new Promise((res) => setTimeout(res, ms));
-
     this.token=token;
     this.status=0;
     this.response=null;
     this.responseHeaders=null;
     this.loaded=(JSON.parse(apiCall("GET", "/users/@me", null, this))["id"]) ? true : false;
-        
+    this.wait=(ms) => new Promise((res) => setTimeout(res, ms));
+    
     this.self={
         guildID: 0,
         channelID: 0,
