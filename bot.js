@@ -8,9 +8,7 @@ function discordBot(token) {
     this.status=0;
     this.response=null;
     this.responseHeaders=null;
-
     this.wait=(ms) => new Promise((res) => setTimeout(res, ms));
-    this.online=() => {try{return this.self.get("discriminator") <= 9999} catch(e) {return false}};
 
     this.self={
         get: (optionalParam=null) => (optionalParam) ? JSON.parse(apiCall("GET", "/users/@me", null, this))[optionalParam] : JSON.parse(apiCall("GET", "/users/@me", null, this)),
