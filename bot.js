@@ -1,5 +1,4 @@
 // https://pirho.tech/discord
-
 function discordBot(token) {
 
     this.token=token;
@@ -17,6 +16,8 @@ function discordBot(token) {
 
     this.message={
         acked: [],
+        ack: (messageID) => this.message.acked.push(messageID),
+        isAcked: (messageID) => this.message.acked.includes(messageID),
         list: (channelID, optionalLimit=50) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/messages?limit=" + optionalLimit, null, this)),
         send: (channelID, message) => apiCall("POST", "/channels/" + channelID + "/messages", {content: message}, this),
         delete: (channelID, messageID) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID, null, this),
