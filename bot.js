@@ -1,4 +1,5 @@
 // https://pirho.tech/discord
+
 function discordBot(token) {
 
     this.token=token;
@@ -30,6 +31,7 @@ function discordBot(token) {
             delete: (channelID, messageID, emoji) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji), null, this),
             deleteAll: (channelID, messageID) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID + "/reactions", null, this),
         },
+        acked: [],
     }
 
     this.user={
