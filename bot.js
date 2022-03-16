@@ -15,6 +15,7 @@ function discordBot(token) {
     this.self={
         get: (optionalParam=null) => (optionalParam) ? JSON.parse(apiCall("GET", "/users/@me", null, this))[optionalParam] : JSON.parse(apiCall("GET", "/users/@me", null, this)),
         set: (paramsArray) => apiCall("PATCH", "/users/@me", paramsArray, this),
+        isTyping: (channelID) => apiCall("POST", "/channels/" + channelID + "/typing", null, this),
     }
 
     this.message={
@@ -28,10 +29,11 @@ function discordBot(token) {
             add: (channelID, messageID, emoji) => apiCall("PUT", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji) + "/@me", null, this),
             remove: (channelID, messageID, emoji) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji) + "/@me", null, this),
             check: (channelID, messageID, emoji) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji), null, this)),
-            delete: (channelID, messageID, emoji) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji), null, this),
             deleteAll: (channelID, messageID) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID + "/reactions", null, this),
+            deleteAllByEmoji: (channelID, messageID, emoji) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji), null, this),
+            deleteOwnByEmoji: (channelID, messageID, emoji) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji) + "/@me", null, this),
+            deleteUserByEmoji: (channelID, messageID, userID, emoji) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID + "/reactions/" + encodeURI(emoji) + "/" + userID, null, this),
         },
-        acked: [],
     }
 
     this.user={
@@ -117,5 +119,5 @@ function apiCall(method, endpoint, data, bot) {
     bot.status=http.status;
     bot.response=http.response;
     bot.responseHeaders=http.getAllResponseHeaders();
-    return http.response;ewf
+    return http.response;
 }
