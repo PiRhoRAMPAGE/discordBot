@@ -1,15 +1,18 @@
 // https://pirho.tech/discord
+
 function discordBot(token) {
 
+    this.wait=(ms) => new Promise((res) => setTimeout(res, ms));
+
     this.token=token;
-    this.guildID=0;
-    this.channelID=0;
     this.status=0;
     this.response=null;
     this.responseHeaders=null;
-    this.wait=(ms) => new Promise((res) => setTimeout(res, ms));
-    
+    this.loaded=(JSON.parse(apiCall("GET", "/users/@me", null, this))["id"]) ? true : false;
+        
     this.self={
+        guildID: 0,
+        channelID: 0,
         get: (optionalParam=null) => (optionalParam) ? JSON.parse(apiCall("GET", "/users/@me", null, this))[optionalParam] : JSON.parse(apiCall("GET", "/users/@me", null, this)),
         set: (paramsArray) => apiCall("PATCH", "/users/@me", paramsArray, this),
     }
@@ -106,7 +109,7 @@ function discordBot(token) {
         get: (guildID, stickerID, optionalParam=null) => (optionalParam) ? JSON.parse(apiCall("GET", "/guilds/" + guildID + "/stickers/" + stickerID, null, this))[optionalParam] : JSON.parse(apiCall("GET", "/guilds/" + guildID + "/stickers/" + stickerID, null, this)),
         set: (guildID, stickerID, paramsArray) => apiCall("PATCH", "/guilds/" + guildID + "/stickers/" + stickerID, paramsArray, this),
     }
-    
+
 }
 
 function apiCall(method, endpoint, data, bot) {
