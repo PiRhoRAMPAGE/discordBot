@@ -12,8 +12,7 @@ function discordBot(token) {
     this.self={
         get: (optionalParam=null) => (optionalParam) ? JSON.parse(apiCall("GET", "/users/@me", null, this))[optionalParam] : JSON.parse(apiCall("GET", "/users/@me", null, this)),
         set: (paramsArray) => apiCall("PATCH", "/users/@me", paramsArray, this),
-        isTyping: (channelID) => apiCall("POST", "/channels/" + channelID + "/typing", null, this),
-        wait: (ms) => new Promise((res) => setTimeout(res, ms));
+        wait: (ms) => new Promise((res) => setTimeout(res, ms)),
     }
 
     this.message={
@@ -21,6 +20,7 @@ function discordBot(token) {
         send: (channelID, message) => apiCall("POST", "/channels/" + channelID + "/messages", {content: message}, this),
         delete: (channelID, messageID) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID, null, this),
         edit: (channelID, messageID, message) => apiCall("PATCH", "/channels/" + channelID + "/messages/" + messageID, {content: message}, this),
+        isTyping: (channelID) => apiCall("POST", "/channels/" + channelID + "/typing", null, this),
         sendSticker: (channelID, stickerID) => apiCall("POST", "/channels/" + channelID + "/messages", {sticker_ids: [stickerID]}, this),
         reply: (guildID, channelID, messageID, message) => apiCall("POST", "/channels/" + channelID + "/messages", {content: message, message_reference: {guild_id: guildID, channel_id: channelID, message_id: messageID}}, this),
         reaction: {
