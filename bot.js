@@ -8,14 +8,15 @@ function discordBot(token) {
     this.status=0;
     this.response=null;
     this.responseHeaders=null;
-
+    this.wait=(ms) => new Promise((res) => setTimeout(res, ms));
+    
     this.self={
         get: (optionalParam=null) => (optionalParam) ? JSON.parse(apiCall("GET", "/users/@me", null, this))[optionalParam] : JSON.parse(apiCall("GET", "/users/@me", null, this)),
         set: (paramsArray) => apiCall("PATCH", "/users/@me", paramsArray, this),
-        wait: (ms) => new Promise((res) => setTimeout(res, ms)),
     }
 
     this.message={
+        acked: [],
         list: (channelID, optionalLimit=50) => JSON.parse(apiCall("GET", "/channels/" + channelID + "/messages?limit=" + optionalLimit, null, this)),
         send: (channelID, message) => apiCall("POST", "/channels/" + channelID + "/messages", {content: message}, this),
         delete: (channelID, messageID) => apiCall("DELETE", "/channels/" + channelID + "/messages/" + messageID, null, this),
